@@ -33,6 +33,10 @@ _agent_action_mapping = {
         "agent_0": jnp.array([0, 1, 2]),
         "agent_1": jnp.array([3, 4, 5]),
     },
+    "reacher_2x1": {
+        "agent_0": jnp.array([0]),
+        "agent_1": jnp.array([1]),
+    }
 }
 
 
@@ -96,6 +100,10 @@ ranges: Dict[str, Dict[str, List[Union[int, Tuple[int, int]]]]] = {
         "agent_0": [0, (2, 5), (8, 9), (11, 13)],
         "agent_1": [0, 2, (5, 9), (14, 16)],
     },
+    "reacher_2x1": {
+        "agent_0": [0, 2, 6, 4, 5, 8, 9],
+        "agent_1": [1, 3, 7, 4, 5, 8, 9]
+    }
 }
 
 _agent_observation_mapping = {

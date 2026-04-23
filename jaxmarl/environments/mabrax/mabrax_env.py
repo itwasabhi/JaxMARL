@@ -23,6 +23,7 @@ class MABraxEnv(MultiAgentEnv):
         backend: str = "positional",
         agent_obs_mapping: Dict | None = None,
         agent_action_mapping: Dict | None = None,
+        override_name: Optional[str] = None,
         **kwargs
     ):
         """Multi-Agent Brax environment.
@@ -52,9 +53,13 @@ class MABraxEnv(MultiAgentEnv):
             agent_obs_mapping: Mapping from agent name to a list of indices 
                 specifying which elements of the global Brax observation vector 
                 are visible to that agent.
-            agent_action_mapping: Mapping from agent name to a list of indices 
-                specifying which joints (action dimensions) of the global Brax 
+            agent_action_mapping: Mapping from agent name to a list of indices
+                specifying which joints (action dimensions) of the global Brax
                 environment are controlled by that agent.
+            override_name: Optional name to use for looking up mappings instead of
+                env_name. Allows creating an environment with one factorization (e.g.
+                ant_4x2) but using mappings from another (e.g. ant_2x4). The base
+                environment is still determined by env_name. Defaults to None (uses env_name).
 
         """
         base_env_name = env_name.split("_")[0]
@@ -67,17 +72,20 @@ class MABraxEnv(MultiAgentEnv):
         self.auto_reset = auto_reset
         self.homogenisation_method = homogenisation_method
 
+        # Use override_name for mapping lookup if provided, otherwise use env_name
+        mapping_name = override_name if override_name is not None else env_name
+
         if agent_action_mapping is None:
-            if env_name not in _agent_action_mapping:
-                raise ValueError(f"No action mapping defined for {env_name}. "
+            if mapping_name not in _agent_action_mapping:
+                raise ValueError(f"No action mapping defined for {mapping_name}. "
                                     "Provide agent_action_mapping instead.")
-            agent_action_mapping = _agent_action_mapping[env_name]
-        
+            agent_action_mapping = _agent_action_mapping[mapping_name]
+
         if agent_obs_mapping is None:
-            if env_name not in _agent_observation_mapping:
-                raise ValueError(f"No observation mapping defined for {env_name}. "
+            if mapping_name not in _agent_observation_mapping:
+                raise ValueError(f"No observation mapping defined for {mapping_name}. "
                                     "Provide agent_obs_mapping instead.")
-            agent_obs_mapping =  _agent_observation_mapping[env_name]
+            agent_obs_mapping =  _agent_observation_mapping[mapping_name]
 
         self.agent_obs_mapping = agent_obs_mapping
         self.agent_action_mapping = agent_action_mapping

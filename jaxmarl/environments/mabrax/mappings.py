@@ -33,6 +33,10 @@ _agent_action_mapping = {
         "agent_0": jnp.array([0, 1]),
         "agent_1": jnp.array([1, 2]),
     },
+        "hopper_2x2asym": {
+        "agent_0": jnp.array([0, 1]),
+        "agent_1": jnp.array([1, 2]),
+    },
     "humanoid_9|8": {
         "agent_0": jnp.array([0, 1, 2, 11, 12, 13, 14, 15, 16]),
         "agent_1": jnp.array([3, 4, 5, 6, 7, 8, 9, 10]),

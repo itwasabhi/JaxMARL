@@ -21,6 +21,7 @@ from .environments import (
     Hopper,
     Walker2d,
     HalfCheetah,
+    Reacher,
     InTheGrid,
     InTheGrid_2p,
     InTheMatrix,
@@ -102,6 +103,8 @@ def make(env_id: str, **env_kwargs):
         env = Humanoid(**env_kwargs)
     elif env_id == "walker2d_2x3":
         env = Walker2d(**env_kwargs)
+    elif env_id =="reacher_2x1":
+        env = Reacher(**env_kwargs)
 
     # 5. InTheGrid
     elif env_id == "storm":

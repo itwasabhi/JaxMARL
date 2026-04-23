@@ -250,3 +250,7 @@ class Humanoid(MABraxEnv):
 class Walker2d(MABraxEnv):
     def __init__(self, **kwargs):
         super().__init__("walker2d_2x3", **kwargs)
+
+class Reacher(MABraxEnv):
+    def __init__(self, **kwargs):
+        super().__init__("reacher_2x1", **kwargs)

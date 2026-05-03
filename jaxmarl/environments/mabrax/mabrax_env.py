@@ -24,18 +24,19 @@ class MABraxEnv(MultiAgentEnv):
         agent_obs_mapping: Dict | None = None,
         agent_action_mapping: Dict | None = None,
         override_name: Optional[str] = None,
+        observe_role_id: bool = False,
         **kwargs
     ):
         """Multi-Agent Brax environment.
 
         Args:
-            env_name: Name of the environment to be used. Expected to be of the format 
+            env_name: Name of the environment to be used. Expected to be of the format
                 `<NAME>_<ID>`, where name corresponds to the underlying brax envirornment
-                name (e.g. `ant`) and the id corresponds to a specific multi-agent mapping 
-                (i.e. 4x2). See `mappings.py` for supported env names. 
-                
-                ID can be omitted if agent_obs_mapping and agent_action_mapping 
-                are provided, allowing for custom multi-agent configurations. 
+                name (e.g. `ant`) and the id corresponds to a specific multi-agent mapping
+                (i.e. 4x2). See `mappings.py` for supported env names.
+
+                ID can be omitted if agent_obs_mapping and agent_action_mapping
+                are provided, allowing for custom multi-agent configurations.
             episode_length: Length of an episode. Defaults to 1000.
             action_repeat: How many repeated actions to take per environment
                 step. Defaults to 1.
@@ -50,8 +51,8 @@ class MABraxEnv(MultiAgentEnv):
                 observations and actions are homogenised by masking the dimensions of
                 the other agents with zeros in the full observation and action vectors.
                 Defaults to None.
-            agent_obs_mapping: Mapping from agent name to a list of indices 
-                specifying which elements of the global Brax observation vector 
+            agent_obs_mapping: Mapping from agent name to a list of indices
+                specifying which elements of the global Brax observation vector
                 are visible to that agent.
             agent_action_mapping: Mapping from agent name to a list of indices
                 specifying which joints (action dimensions) of the global Brax
@@ -60,6 +61,10 @@ class MABraxEnv(MultiAgentEnv):
                 env_name. Allows creating an environment with one factorization (e.g.
                 ant_4x2) but using mappings from another (e.g. ant_2x4). The base
                 environment is still determined by env_name. Defaults to None (uses env_name).
+            observe_role_id: If True, appends a one-hot encoded agent role ID to each
+                agent's observation. The one-hot vector has length num_agents, with a 1
+                at the agent's index. This allows a shared policy to disambiguate its role
+                (e.g., left vs right leg in an ant). Defaults to False.
 
         """
         base_env_name = env_name.split("_")[0]
@@ -89,17 +94,19 @@ class MABraxEnv(MultiAgentEnv):
 
         self.agent_obs_mapping = agent_obs_mapping
         self.agent_action_mapping = agent_action_mapping
+        self.observe_role_id = observe_role_id
 
         self.agents = list(self.agent_obs_mapping.keys())
 
         self.num_agents = len(self.agent_obs_mapping)
         obs_sizes = {
-            agent: self.num_agents
+            agent: (self.num_agents
             + max([o.size for o in self.agent_obs_mapping.values()])
             if homogenisation_method == "max"
             else self.env.observation_size
             if homogenisation_method == "concat"
-            else obs.size
+            else obs.size)
+            + (self.num_agents if observe_role_id else 0)
             for agent, obs in self.agent_obs_mapping.items()
         }
         act_sizes = {
@@ -228,6 +235,14 @@ class MABraxEnv(MultiAgentEnv):
             else:
                 # Just agent's own observations
                 agent_obs[agent_name] = global_obs[obs_indices]
+
+            # Append role one-hot if requested
+            if self.observe_role_id:
+                role_one_hot = jnp.zeros(self.num_agents).at[agent_idx].set(1)
+                agent_obs[agent_name] = jnp.concatenate(
+                    [agent_obs[agent_name], role_one_hot]
+                )
+
         return agent_obs
 
     @property

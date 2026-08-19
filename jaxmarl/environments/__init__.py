@@ -25,7 +25,7 @@ from .switch_riddle import SwitchRiddle
 
 # MABrax requires brax, an optional dependency due to the deprecation: `pip install jaxmarl[mabrax]`
 try:
-    from .mabrax import Ant, HalfCheetah, Hopper, Humanoid, Walker2d
+    from .mabrax import Ant, HalfCheetah, Hopper, Humanoid, Reacher, Walker2d
 
     MABRAX_AVAILABLE = True
 except ImportError:
@@ -61,6 +61,7 @@ __all__ = [
     "HalfCheetah",
     "Hopper",
     "Humanoid",
+    "Reacher",
     "Walker2d",
     "SimpleAdversaryMPE",
     "SimpleCryptoMPE",

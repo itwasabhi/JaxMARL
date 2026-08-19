@@ -31,7 +31,7 @@ from .environments import (
 
 # MABrax requires brax, an optional dependency
 if MABRAX_AVAILABLE:
-    from .environments import Ant, HalfCheetah, Hopper, Humanoid, Walker2d
+    from .environments import Ant, HalfCheetah, Hopper, Humanoid, Reacher, Walker2d
 
 # Handle submoduled environments
 if SUBMODULE_ENVIRONMENTS:
@@ -99,6 +99,7 @@ def make(env_id: str, **env_kwargs) -> MultiAgentEnv:
         "hopper_3x1",
         "humanoid_9|8",
         "walker2d_2x3",
+        "reacher_2x1",
     ):
         if not MABRAX_AVAILABLE:
             raise ImportError(
@@ -115,6 +116,8 @@ def make(env_id: str, **env_kwargs) -> MultiAgentEnv:
             env = Humanoid(**env_kwargs)
         elif env_id == "walker2d_2x3":
             env = Walker2d(**env_kwargs)
+        elif env_id == "reacher_2x1":
+            env = Reacher(**env_kwargs)
 
     # 5. InTheGrid
     elif env_id == "storm":
@@ -192,6 +195,7 @@ registered_envs = [
     "hopper_3x1",
     "humanoid_9|8",
     "walker2d_2x3",
+    "reacher_2x1",
     "storm",
     "storm_2p",
     "storm_np",

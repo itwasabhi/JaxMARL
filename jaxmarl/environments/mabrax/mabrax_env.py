@@ -42,6 +42,8 @@ class MABraxEnv(MultiAgentEnv):
         backend: str = "positional",
         agent_obs_mapping: Dict | None = None,
         agent_action_mapping: Dict | None = None,
+        override_name: Optional[str] = None,
+        observe_role_id: bool = False,
         **kwargs,
     ):
         """Multi-Agent Brax environment.
@@ -74,6 +76,14 @@ class MABraxEnv(MultiAgentEnv):
             agent_action_mapping: Mapping from agent name to a list of indices
                 specifying which joints (action dimensions) of the global Brax
                 environment are controlled by that agent.
+            override_name: Optional name to use for looking up mappings instead of
+                env_name. Allows creating an environment with one factorization (e.g.
+                ant_4x2) but using mappings from another (e.g. ant_2x4). The base
+                environment is still determined by env_name. Defaults to None (uses env_name).
+            observe_role_id: If True, appends a one-hot encoded agent role ID to each
+                agent's observation. The one-hot vector has length num_agents, with a 1
+                at the agent's index. This allows a shared policy to disambiguate its role
+                (e.g., left vs right leg in an ant). Defaults to False.
 
         """
         warnings.warn(
@@ -97,35 +107,42 @@ class MABraxEnv(MultiAgentEnv):
         self.auto_reset = auto_reset
         self.homogenisation_method = homogenisation_method
 
+        # Use override_name for mapping lookup if provided, otherwise use env_name
+        mapping_name = override_name if override_name is not None else env_name
+
         if agent_action_mapping is None:
-            if env_name not in _agent_action_mapping:
+            if mapping_name not in _agent_action_mapping:
                 raise ValueError(
-                    f"No action mapping defined for {env_name}. "
+                    f"No action mapping defined for {mapping_name}. "
                     "Provide agent_action_mapping instead."
                 )
-            agent_action_mapping = _agent_action_mapping[env_name]
+            agent_action_mapping = _agent_action_mapping[mapping_name]
 
         if agent_obs_mapping is None:
-            if env_name not in _agent_observation_mapping:
+            if mapping_name not in _agent_observation_mapping:
                 raise ValueError(
-                    f"No observation mapping defined for {env_name}. "
+                    f"No observation mapping defined for {mapping_name}. "
                     "Provide agent_obs_mapping instead."
                 )
-            agent_obs_mapping = _agent_observation_mapping[env_name]
+            agent_obs_mapping = _agent_observation_mapping[mapping_name]
 
         self.agent_obs_mapping = agent_obs_mapping
         self.agent_action_mapping = agent_action_mapping
+        self.observe_role_id = observe_role_id
 
         self.agents = list(self.agent_obs_mapping.keys())
 
         self.num_agents = len(self.agent_obs_mapping)
         obs_sizes = {
-            agent: self.num_agents
-            + max([o.size for o in self.agent_obs_mapping.values()])
-            if homogenisation_method == "max"
-            else self.env.observation_size
-            if homogenisation_method == "concat"
-            else obs.size
+            agent: (
+                self.num_agents
+                + max([o.size for o in self.agent_obs_mapping.values()])
+                if homogenisation_method == "max"
+                else self.env.observation_size
+                if homogenisation_method == "concat"
+                else obs.size
+            )
+            + (self.num_agents if observe_role_id else 0)
             for agent, obs in self.agent_obs_mapping.items()
         }
         act_sizes = {
@@ -252,6 +269,14 @@ class MABraxEnv(MultiAgentEnv):
             else:
                 # Just agent's own observations
                 agent_obs[agent_name] = global_obs[obs_indices]
+
+            # Append role one-hot if requested
+            if self.observe_role_id:
+                role_one_hot = jnp.zeros(self.num_agents).at[agent_idx].set(1)
+                agent_obs[agent_name] = jnp.concatenate(
+                    [agent_obs[agent_name], role_one_hot]
+                )
+
         return agent_obs
 
     @property
@@ -282,3 +307,8 @@ class Humanoid(MABraxEnv):
 class Walker2d(MABraxEnv):
     def __init__(self, **kwargs):
         super().__init__("walker2d_2x3", **kwargs)
+
+
+class Reacher(MABraxEnv):
+    def __init__(self, **kwargs):
+        super().__init__("reacher_2x1", **kwargs)

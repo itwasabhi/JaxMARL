@@ -13,6 +13,10 @@ _agent_action_mapping = {
         "agent_2": jnp.array([4, 5]),
         "agent_3": jnp.array([6, 7]),
     },
+    "ant_2x4": {
+        "agent_0": jnp.array([0, 1, 2, 3]),
+        "agent_1": jnp.array([4, 5, 6, 7]),
+    },
     "halfcheetah_6x1": {
         "agent_0": jnp.array([0]),
         "agent_1": jnp.array([1]),
@@ -26,6 +30,10 @@ _agent_action_mapping = {
         "agent_1": jnp.array([1]),
         "agent_2": jnp.array([2]),
     },
+    "hopper_2x2": {
+        "agent_0": jnp.array([0, 1]),
+        "agent_1": jnp.array([1, 2]),
+    },
     "humanoid_9|8": {
         "agent_0": jnp.array([0, 1, 2, 11, 12, 13, 14, 15, 16]),
         "agent_1": jnp.array([3, 4, 5, 6, 7, 8, 9, 10]),
@@ -33,6 +41,10 @@ _agent_action_mapping = {
     "walker2d_2x3": {
         "agent_0": jnp.array([0, 1, 2]),
         "agent_1": jnp.array([3, 4, 5]),
+    },
+    "reacher_2x1": {
+        "agent_0": jnp.array([0]),
+        "agent_1": jnp.array([1]),
     },
 }
 
@@ -52,6 +64,10 @@ ranges: Dict[str, Dict[str, List[Union[int, Tuple[int, int]]]]] = {
         "agent_2": [(0, 5), 7, 9, 10, 11, (13, 18), 23, 24],
         "agent_3": [(0, 5), 7, 9, 11, 12, (13, 18), 25, 26],
     },
+    "ant_2x4": {
+        "agent_0": [(0, 5), 6, 7, 8, 9, 11, (13, 18), 19, 20, 21, 22],
+        "agent_1": [(0, 5), 7, 9, 10, 11, 12, (13, 18), 23, 24, 25, 26],
+    },
     "halfcheetah_6x1": {
         "agent_0": [(1, 2), 3, 4, 6, (9, 11), 12],
         "agent_1": [(1, 2), 3, 4, 5, (9, 11), 13],
@@ -64,6 +80,10 @@ ranges: Dict[str, Dict[str, List[Union[int, Tuple[int, int]]]]] = {
         "agent_0": [(0, 1), 2, 3, (5, 7), 8],
         "agent_1": [(0, 1), 2, 3, 4, (5, 7), 9],
         "agent_2": [(0, 1), 3, 4, (5, 7), 10],
+    },
+    "hopper_2x2": {
+        "agent_0": [(0, 1), 2, 3, 4, (5, 7), 8, 9, 10],
+        "agent_1": [(0, 1), 2, 3, 4, (5, 7), 8, 9, 10],
     },
     "humanoid_9|8": {
         "agent_0": [
@@ -96,6 +116,10 @@ ranges: Dict[str, Dict[str, List[Union[int, Tuple[int, int]]]]] = {
     "walker2d_2x3": {
         "agent_0": [0, (2, 5), (8, 9), (11, 13)],
         "agent_1": [0, 2, (5, 9), (14, 16)],
+    },
+    "reacher_2x1": {
+        "agent_0": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "agent_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     },
 }
 
